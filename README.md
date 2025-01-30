@@ -82,6 +82,7 @@ Usage: ./run_benchmark.sh [options]
 
 # For Waii benchmark
 ./run_benchmark.sh -b ../resources/config/benchmark_config.yaml -n WaiiBenchmark -w ../resources/workloads/spider_workload.yaml -i waii_benchmark
+./run_benchmark.sh -b ../resources/config/benchmark_config_northwind.yaml  -n WaiiBenchmark -w ../resources/workloads/northwind/northwind_workload.yaml -i waii_benchmark
 
 ```
 

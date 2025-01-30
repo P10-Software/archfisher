@@ -4,7 +4,7 @@ import os
 import uuid
 
 from waii_sdk_py import WAII
-from waii_sdk_py.semantic_context import SemanticStatement, ModifySemanticContextRequest
+from waii_sdk_py.semantic_context import SemanticStatement, ModifySemanticContextRequest, GetSemanticContextRequest
 
 from constants import WAII_CONTEXT, WAII_DB_CONNECTION_KEY
 
@@ -35,6 +35,17 @@ def add_contexts(config: dict):
                     always_included = ctx.get('always_include', True)
                     id = ctx.get('id', None)
                     statements.append(SemanticStatement(id = id, lookup_summaries = lookup_summaries, summarization_prompt = summarization_prompt, statement=stmt, scope=scope, labels=labels, always_include=always_included))
+
+                # Get existing sem contexts and delete them
+                response = WAII.SemanticContext.get_semantic_context(GetSemanticContextRequest())
+                ids = []
+                for s in response.semantic_context:
+                    if s.id:
+                        ids.append(s.id)
+                # Delete existing sem contexts
+                response = WAII.SemanticContext.modify_semantic_context(ModifySemanticContextRequest(deleted=ids))
+                print(f"Deleted existing sem contexts")
+
 
                 # Finally add all contexts
                 response = WAII.SemanticContext.modify_semantic_context(

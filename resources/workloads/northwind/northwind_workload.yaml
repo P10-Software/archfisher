@@ -1,0 +1,1067 @@
+q_1:
+  query_name: q_1
+  question: What are the most popular items based on sales quantities? Display product
+    name and total quantity sold
+  golden_query: "SELECT\n  products.product_name,\n  SUM(order_details.quantity)
+    AS total_quantity_sold\nFROM northwind.order_details\nJOIN northwind.products\n\
+    \  ON order_details.product_id = products.id\nGROUP BY\n  products.product_name\n
+    ORDER BY\n  total_quantity_sold DESC"
+  comparison_rules:
+  - columns:
+    - '*'
+    match: exact
+  schemas:
+  - northwind
+  auto_select_schema: 'false'
+q_2:
+  query_name: q_2
+  question: Which products have the highest overall profit margins based on total aggregated sales and costs? 
+    Display the product name, category, and profit margin, ordered by profit margin in descending order.
+  golden_query: "WITH sales_data AS (\n  SELECT\n    order_details.product_id,\n\
+    \    SUM(order_details.unit_price * order_details.quantity) AS total_sales,\n\
+    \    SUM(products.standard_cost * order_details.quantity) AS total_cost\n  FROM
+    northwind.order_details\n  JOIN northwind.products\n    ON order_details.product_id
+    = products.id\n  GROUP BY\n    order_details.product_id\n)\nSELECT\n  products.product_name,\n\
+    \  products.category,\n  (\n    sales_data.total_sales - sales_data.total_cost\n\
+    \  ) / NULLIF(sales_data.total_sales, 0) AS profit_margin\nFROM sales_data\n
+    JOIN northwind.products\n  ON sales_data.product_id = products.id\nORDER BY\n\
+    \  profit_margin DESC"
+  comparison_rules:
+  - columns:
+    - product_name
+    - category
+    - profit_margin
+    match: exact
+  schemas:
+  - northwind
+  auto_select_schema: 'false'
+q_3:
+  query_name: q_3
+  question: What categories of products are generating the highest revenue? Display
+    category name and total revenue
+  golden_query: "SELECT\n  products.category,\n  SUM(order_details.quantity * order_details.unit_price)
+    AS total_revenue\nFROM northwind.order_details\nJOIN northwind.orders\n  ON
+    order_details.order_id = orders.id\nJOIN northwind.products\n  ON order_details.product_id
+    = products.id\nGROUP BY\n  products.category\nORDER BY\n  total_revenue DESC"
+  comparison_rules:
+  - columns:
+    - category
+    - total_revenue
+    match: exact
+  schemas:
+  - northwind
+  auto_select_schema: 'false'
+q_4:
+  query_name: q_4
+  question: What are the average prices of items across different product categories?
+    Display category name and average price
+  golden_query: "SELECT\n  category,\n  AVG(list_price) AS avg_price\nFROM northwind.products\n
+    GROUP BY\n  category"
+  comparison_rules:
+  - columns:
+    - '*'
+    match: exact
+  schemas:
+  - northwind
+  auto_select_schema: 'false'
+q_5:
+  query_name: q_5
+  question: Identify the top 5 products based on total revenue generated. Display
+    product name and total revenue
+  golden_query: "SELECT\n  products.product_name,\n  SUM(order_details.quantity
+    * order_details.unit_price) AS total_revenue\nFROM northwind.order_details\n
+    JOIN northwind.products\n  ON order_details.product_id = products.id\nGROUP
+    BY\n  products.product_name\nORDER BY\n  total_revenue DESC\nLIMIT 5"
+  comparison_rules:
+  - columns:
+    - '*'
+    match: exact
+  schemas:
+  - northwind
+  auto_select_schema: 'false'
+q_6:
+  query_name: q_6
+  question: Which suppliers have fulfilled the highest number of orders? Display
+    as Supplier_Company and total_orders_fulfilled
+  golden_query:
+  - "SELECT\n  suppliers.company AS Supplier_Company,\n  COUNT(DISTINCT purchase_orders.id)
+    AS total_orders_fulfilled\nFROM northwind.suppliers\nJOIN northwind.purchase_orders\n\
+    \  ON suppliers.id = purchase_orders.supplier_id\nJOIN northwind.purchase_order_details\n\
+    \  ON purchase_orders.id = purchase_order_id\nWHERE\n  NOT date_received IS
+    NULL\nGROUP BY\n  suppliers.company\nORDER BY\n  total_orders_fulfilled DESC"
+  - "SELECT\n  suppliers.company AS Supplier_Company,\n  COUNT(purchase_orders.id)
+    AS total_orders_fulfilled\nFROM northwind.purchase_order_details\nJOIN northwind.purchase_orders\n\
+    \  ON purchase_order_id = purchase_orders.id\nJOIN northwind.suppliers\n  ON
+    purchase_orders.supplier_id = suppliers.id\nWHERE\n  NOT date_received IS NULL\n
+    GROUP BY\n  suppliers.company\nORDER BY\n  total_orders_fulfilled DESC"
+  comparison_rules:
+  - columns:
+    - '*'
+    match: exact
+  schemas:
+  - northwind
+  auto_select_schema: 'false'
+q_7:
+  query_name: q_7
+  question: Identify suppliers that have not delivered any orders in feb 2006. Display
+    company, first_name, last_name
+  golden_query: "SELECT\n  company,\n  first_name,\n  last_name\nFROM northwind.suppliers\n\
+    WHERE\n  NOT id IN (\n    SELECT DISTINCT\n      purchase_orders.supplier_id\n\
+    \    FROM northwind.purchase_orders\n    JOIN northwind.purchase_order_details\n\
+    \      ON purchase_orders.id = purchase_order_id\n    WHERE\n      MONTH(date_received)
+    = 2 AND YEAR(date_received) = 2006 AND NOT date_received IS NULL\n  )"
+  comparison_rules:
+  - columns:
+    - company
+    - first_name
+    - last_name
+    match: exact
+  schemas:
+  - northwind
+  auto_select_schema: 'false'
+q_8:
+  query_name: q_8
+  question: What is the current status of all purchase orders that are not marked
+    as ‘Closed’? Display order id, order_date, expected_date, status
+  golden_query: "SELECT\n  purchase_orders.id,\n  status,\n  purchase_orders.creation_date,\n\
+    \  purchase_orders.expected_date,\n  purchase_orders.supplier_id\nFROM northwind.purchase_orders\n
+    JOIN northwind.purchase_order_status\n  ON purchase_orders.status_id = purchase_order_status.id\n\
+    WHERE\n  status <> 'Closed'"
+  comparison_rules:
+  - columns:
+    - id
+    - expected_date
+    match: oneof
+  schemas:
+  - northwind
+  auto_select_schema: 'false'
+q_9:
+  query_name: q_9
+  question: Which customers place the most frequent orders? Display customer id,
+    first name, last name and order count
+  golden_query: "WITH customer_orders AS (\n  SELECT\n    customers.id AS customer_id,\n\
+    \    customers.first_name,\n    customers.last_name,\n    COUNT(orders.id) AS
+    order_count\n  FROM northwind.customers\n  JOIN northwind.orders\n    ON customers.id
+    = orders.customer_id\n  GROUP BY\n    customers.id,\n    customers.first_name,\n\
+    \    customers.last_name\n)\nSELECT\n  customer_id,\n  first_name,\n  last_name,\n\
+    \  order_count\nFROM customer_orders\nORDER BY\n  order_count DESC"
+  comparison_rules:
+  - columns:
+    - '*'
+    match: exact
+  schemas:
+  - northwind
+  auto_select_schema: 'false'
+q_10:
+  query_name: q_10
+  question: What is the average time taken to settle invoices after creation?
+  golden_query: "SELECT\n  AVG(DATEDIFF(orders.paid_date, invoices.invoice_date))
+    AS avg_settlement_time\nFROM northwind.invoices\nJOIN northwind.orders\n  ON
+    invoices.order_id = orders.id\nWHERE\n  NOT orders.paid_date IS NULL"
+  comparison_rules:
+  - columns:
+    - '*'
+    match: exact
+  schemas:
+  - northwind
+  auto_select_schema: 'false'
+q_11:
+  query_name: q_11
+  question: Identify the top suppliers based on the total value of goods supplied
+    (calculated as quantity × unit cost), considering only goods that have been
+    received. Display supplier name and total value supplied
+  golden_query: "SELECT\n  suppliers.company,\n  SUM(quantity * unit_cost) AS total_value\n
+    FROM northwind.purchase_order_details\nJOIN northwind.purchase_orders\n  ON
+    purchase_order_id = purchase_orders.id\nJOIN northwind.suppliers\n  ON purchase_orders.supplier_id
+    = suppliers.id\nWHERE\n  NOT date_received IS NULL\nGROUP BY\n  suppliers.company\n
+    ORDER BY\n  total_value DESC"
+  comparison_rules:
+  - columns:
+    - '*'
+    match: exact
+  schemas:
+  - northwind
+  auto_select_schema: 'false'
+q_12:
+  query_name: q_12
+  question: Show the average delivery delay for each supplier. Include suppliers even if they have no delivery dates, 
+    and ignore missing dates automatically in the calculation. Display company,
+    avg_delivery_delay
+  golden_query:
+  - "SELECT employees.id, employees.first_name, employees.last_name, COUNT(orders.id) AS total_orders FROM northwind.employees LEFT JOIN northwind.orders ON employees.id = orders.employee_id GROUP BY employees.id, employees.first_name, employees.last_name ORDER BY employees.id"
+  comparison_rules:
+  - columns:
+    - '*'
+    match: exact
+  schemas:
+  - northwind
+  auto_select_schema: 'false'
+q_13:
+  query_name: q_13
+  question: How many orders are currently in the “New” status across all regions?
+    (no need to group by location. Just mentioned for all regions)
+  golden_query:
+  - "SELECT\n  COUNT(orders.id) AS total_new_orders\nFROM northwind.orders\nJOIN
+    northwind.orders_status\n  ON orders.status_id = orders_status.id\nWHERE\n \
+    \ orders_status.status_name = 'New'"
+  - "SELECT\n  orders.ship_city AS Region,\n  orders_status.status_name AS Status,\n\
+    \  COUNT(orders.id) AS total_orders\nFROM northwind.orders\nJOIN northwind.orders_status\n\
+    \  ON orders.status_id = orders_status.id\nWHERE\n  orders_status.status_name
+    = 'New'\nGROUP BY\n  orders.ship_city,\n  orders_status.status_name\nORDER BY\n\
+    \  total_orders DESC"
+  comparison_rules:
+  - columns:
+    - '*'
+    match: exact
+  schemas:
+  - northwind
+  auto_select_schema: 'false'
+q_14:
+  query_name: q_14
+  question: Which countries generate the highest revenue from ‘Closed’ orders, based
+    on product sales? Display country and total_revenue
+  golden_query: "SELECT\n  o.ship_country_region,\n  SUM(od.unit_price * od.quantity
+    * (\n    1 - od.discount\n  )) AS total_revenue\nFROM northwind.orders AS o\n
+    JOIN northwind.orders_status AS os\n  ON o.status_id = os.id\nJOIN northwind.order_details
+    AS od\n  ON o.id = od.order_id\nWHERE\n  os.status_name = 'Closed'\nGROUP BY\n\
+    \  o.ship_country_region\nORDER BY\n  total_revenue DESC"
+  comparison_rules:
+  - columns:
+    - '*'
+    match: exact
+  schemas:
+  - northwind
+  auto_select_schema: 'false'
+q_15:
+  query_name: q_15
+  question: What is the total value of “Approved” purchase orders awaiting delivery?
+  golden_query: "WITH approved_orders AS (\n  SELECT\n    purchase_orders.id,\n\
+    \    purchase_orders.payment_amount\n  FROM northwind.purchase_orders\n  JOIN
+    northwind.purchase_order_status\n    ON purchase_orders.status_id = purchase_order_status.id\n\
+    \  WHERE\n    status = 'Approved'\n), awaiting_delivery AS (\n  SELECT DISTINCT\n\
+    \    purchase_order_id\n  FROM northwind.purchase_order_details\n  WHERE\n \
+    \   date_received IS NULL\n)\nSELECT\n  SUM(approved_orders.payment_amount)
+    AS total_value\nFROM approved_orders\nJOIN awaiting_delivery\n  ON approved_orders.id
+    = awaiting_delivery.purchase_order_id"
+  comparison_rules:
+  - columns:
+    - '*'
+    match: exact
+  schemas:
+  - northwind
+  auto_select_schema: 'false'
+q_16:
+  query_name: q_16
+  question: How many invoices are linked to orders that are still unpaid, and what
+    is the total amount due for those invoices?
+  golden_query: "WITH unpaid_orders AS (\n  SELECT\n    id\n  FROM northwind.orders\n\
+    \  WHERE\n    paid_date IS NULL\n)\nSELECT\n  COUNT(invoices.id) AS total_invoices,\n\
+    \  SUM(invoices.amount_due) AS total_amount_due\nFROM northwind.invoices\nJOIN
+    unpaid_orders\n  ON invoices.order_id = unpaid_orders.id"
+  comparison_rules:
+  - columns:
+    - '*'
+    match: exact
+  schemas:
+  - northwind
+  auto_select_schema: 'false'
+q_17:
+  query_name: q_17
+  question: Show the employee ID, first name, last name, and the total number of unique orders for each employee who has placed at least one order. Order the results by employee ID.
+  golden_query:
+  - "SELECT employees.id, employees.first_name, employees.last_name, COUNT(DISTINCT orders.id) AS total_unique_orders FROM northwind.employees JOIN northwind.orders ON employees.id = orders.employee_id GROUP BY employees.id, employees.first_name, employees.last_name ORDER BY employees.id"
+  comparison_rules:
+  - columns:
+    - '*'
+    match: exact
+  schemas:
+  - northwind
+  auto_select_schema: 'false'
+q_18:
+  query_name: q_18
+  question: Show the count of non-discontinued products for each category, filtering
+    only those with more than one product. Display category name and total products
+  golden_query:
+  - "WITH non_discontinued_products AS (\n  SELECT\n    category,\n    COUNT(id)
+    AS total_non_discontinued_products\n  FROM northwind.products\n  WHERE\n   \
+    \ discontinued = 0\n  GROUP BY\n    category\n)\nSELECT\n  category,\n  total_non_discontinued_products\n
+    FROM non_discontinued_products\nWHERE\n  total_non_discontinued_products > 1"
+  comparison_rules:
+  - columns:
+    - '*'
+    match: exact
+  schemas:
+  - northwind
+  auto_select_schema: 'false'
+q_19:
+  query_name: q_19
+  question: "Analyze orders completed in the Feb 2006. For each order, include:\n
+    \t- The customer’s name, region, and total purchases,\n\t- The products ordered
+    and their categories,\n\t- The suppliers of those products,\n\t- The employees
+    involved and their performance,\n\t- Taxes, discounts, and shipping fees applied,\n
+    \t- Shipping companies and delivery times,\n\t- Any delays in fulfillment and
+    the reasons for those delays"
+  golden_query:
+  - "WITH filtered_orders AS (\n  SELECT\n    id,\n    customer_id,\n    employee_id,\n\
+    \    shipper_id,\n    order_date,\n    paid_date,\n    shipping_fee,\n    taxes,\n\
+    \    tax_rate,\n    status_id,\n    notes\n  FROM northwind.orders AS o\n  WHERE\n\
+    \    MONTH(order_date) = 2 AND YEAR(order_date) = 2006\n), customer_info AS
+    (\n  SELECT\n    c.id AS customer_id,\n    CONCAT(c.first_name, ' ', c.last_name)
+    AS customer_name,\n    c.state_province AS region\n  FROM northwind.customers
+    AS c\n), product_info AS (\n  SELECT\n    od.order_id,\n    p.product_name,\n\
+    \    p.category,\n    s.company AS supplier\n  FROM northwind.order_details
+    AS od\n  JOIN northwind.products AS p\n    ON od.product_id = p.id\n  JOIN northwind.suppliers
+    AS s\n    ON FIND_IN_SET(s.id, p.supplier_ids) > 0\n), employee_info AS (\n\
+    \  SELECT\n    e.id AS employee_id,\n    CONCAT(e.first_name, ' ', e.last_name)
+    AS employee_name,\n    e.job_title AS employee_performance\n  FROM northwind.employees
+    AS e\n), shipping_info AS (\n  SELECT\n    s.id AS shipper_id,\n    s.company
+    AS shipping_company\n  FROM northwind.shippers AS s\n), order_status AS (\n\
+    \  SELECT\n    os.id AS status_id,\n    os.status_name\n  FROM northwind.orders_status
+    AS os\n)\nSELECT\n  ci.customer_name,\n  ci.region,\n  SUM(fo.shipping_fee +
+    fo.taxes) AS total_purchases,\n  GROUP_CONCAT(DISTINCT pi.product_name SEPARATOR
+    ',') AS products_ordered,\n  GROUP_CONCAT(DISTINCT pi.category SEPARATOR ',')
+    AS product_categories,\n  GROUP_CONCAT(DISTINCT pi.supplier SEPARATOR ',') AS
+    suppliers,\n  GROUP_CONCAT(DISTINCT ei.employee_name SEPARATOR ',') AS employees_involved,\n\
+    \  AVG(ei.employee_performance) AS employee_performance,\n  SUM(fo.taxes) AS
+    total_taxes,\n  SUM(od.discount) AS total_discounts,\n  SUM(fo.shipping_fee)
+    AS total_shipping_fees,\n  GROUP_CONCAT(DISTINCT si.shipping_company SEPARATOR
+    ',') AS shipping_companies,\n  AVG(DATEDIFF(fo.paid_date, fo.order_date)) AS
+    average_delivery_times,\n  GROUP_CONCAT(DISTINCT os.status_name SEPARATOR ',')
+    AS delays_in_fulfillment,\n  GROUP_CONCAT(DISTINCT fo.notes SEPARATOR ',') AS
+    reasons_for_delays\nFROM filtered_orders AS fo\nJOIN customer_info AS ci\n \
+    \ ON fo.customer_id = ci.customer_id\nJOIN product_info AS pi\n  ON fo.id =
+    pi.order_id\nJOIN employee_info AS ei\n  ON fo.employee_id = ei.employee_id\n
+    JOIN shipping_info AS si\n  ON fo.shipper_id = si.shipper_id\nJOIN order_status
+    AS os\n  ON fo.status_id = os.status_id\nJOIN northwind.order_details AS od\n\
+    \  ON fo.id = od.order_id\nGROUP BY\n  ci.customer_name,\n  ci.region,\n  pi.product_name,\n\
+    \  pi.category,\n  pi.supplier,\n  ei.employee_name,\n  si.shipping_company,\n\
+    \  os.status_name,\n  fo.notes"
+  comparison_rules:
+  - columns:
+    - customer_name
+    - region
+    match: exact
+  schemas:
+  - northwind
+  auto_select_schema: 'false'
+q_20:
+  query_name: q_20
+  question: Show me all the orders that completed in feb 2006 along with the customer
+    first and last name details. Display order id, order_date, customer's first
+    name and last name
+  golden_query:
+  - "SELECT\n  orders.id AS order_id,\n  orders.order_date,\n  customers.first_name,\n\
+    \  customers.last_name\nFROM northwind.orders\nJOIN northwind.customers\n  ON
+    orders.customer_id = customers.id\nWHERE\n  YEAR(orders.order_date) = 2006 AND
+    MONTH(orders.order_date) = 2"
+  comparison_rules:
+  - columns:
+    - '*'
+    match: exact
+  schemas:
+  - northwind
+  auto_select_schema: 'false'
+q_21:
+  query_name: q_21
+  question: "For each product sold in Q1 2006, calculate:\n\t-\tThe total quantity
+    sold,\n\t-\tThe total restocked quantity,\n\t-\tThe suppliers who provided the
+    products,\n\t-\tThe employees who sold them,\n\t-\tThe customers who purchased
+    them,\n\t-\tThe regions and shipping companies involved\t"
+  golden_query:
+  - "SELECT\n  sp.product_name,\n  SUM(sp.quantity) AS total_quantity_sold,\n  SUM(rp.quantity)
+    AS total_restocked_quantity,\n  GROUP_CONCAT(DISTINCT ps.company SEPARATOR ',')
+    AS suppliers,\n  GROUP_CONCAT(DISTINCT pe.first_name SEPARATOR ',') AS employees,\n\
+    \  GROUP_CONCAT(DISTINCT pc.company SEPARATOR ',') AS customers,\n  GROUP_CONCAT(DISTINCT
+    pr.ship_city SEPARATOR ',') AS regions,\n  GROUP_CONCAT(DISTINCT psc.company
+    SEPARATOR ',') AS shipping_companies\nFROM (\n  SELECT\n    p.product_name,\n\
+    \    it.quantity,\n    p.id\n  FROM northwind.inventory_transactions AS it\n\
+    \  JOIN northwind.products AS p\n    ON it.product_id = p.id\n  WHERE\n    it.transaction_type
+    = 1\n    AND it.transaction_created_date BETWEEN '2006-01-01' AND '2006-03-31'\n
+    ) AS sp\nLEFT JOIN (\n  SELECT\n    p.product_name,\n    pod.quantity\n  FROM
+    northwind.purchase_order_details AS pod\n  JOIN northwind.products AS p\n  \
+    \  ON pod.product_id = p.id\n  WHERE\n    NOT pod.date_received IS NULL\n  \
+    \  AND pod.date_received BETWEEN '2006-01-01' AND '2006-03-31'\n) AS rp\n  ON
+    sp.product_name = rp.product_name\nLEFT JOIN (\n  SELECT DISTINCT\n    p.product_name,\n\
+    \    s.company\n  FROM northwind.purchase_orders AS po\n  JOIN northwind.purchase_order_details
+    AS pod\n    ON po.id = pod.purchase_order_id\n  JOIN northwind.suppliers AS
+    s\n    ON po.supplier_id = s.id\n  JOIN northwind.products AS p\n    ON pod.product_id
+    = p.id\n  WHERE\n    NOT pod.date_received IS NULL\n    AND pod.date_received
+    BETWEEN '2006-01-01' AND '2006-03-31'\n) AS ps\n  ON sp.product_name = ps.product_name\n
+    LEFT JOIN (\n  SELECT DISTINCT\n    p.product_name,\n    e.first_name\n  FROM
+    northwind.orders AS o\n  JOIN northwind.order_details AS od\n    ON o.id = od.order_id\n\
+    \  JOIN northwind.employees AS e\n    ON o.employee_id = e.id\n  JOIN northwind.products
+    AS p\n    ON od.product_id = p.id\n  WHERE\n    o.order_date BETWEEN '2006-01-01'
+    AND '2006-03-31'\n) AS pe\n  ON sp.product_name = pe.product_name\nLEFT JOIN
+    (\n  SELECT DISTINCT\n    p.product_name,\n    c.company\n  FROM northwind.orders
+    AS o\n  JOIN northwind.order_details AS od\n    ON o.id = od.order_id\n  JOIN
+    northwind.customers AS c\n    ON o.customer_id = c.id\n  JOIN northwind.products
+    AS p\n    ON od.product_id = p.id\n  WHERE\n    o.order_date BETWEEN '2006-01-01'
+    AND '2006-03-31'\n) AS pc\n  ON sp.product_name = pc.product_name\nLEFT JOIN
+    (\n  SELECT DISTINCT\n    p.product_name,\n    o.ship_city\n  FROM northwind.orders
+    AS o\n  JOIN northwind.order_details AS od\n    ON o.id = od.order_id\n  JOIN
+    northwind.products AS p\n    ON od.product_id = p.id\n  WHERE\n    o.order_date
+    BETWEEN '2006-01-01' AND '2006-03-31'\n) AS pr\n  ON sp.product_name = pr.product_name\n
+    LEFT JOIN (\n  SELECT DISTINCT\n    p.product_name,\n    s.company\n  FROM northwind.orders
+    AS o\n  JOIN northwind.order_details AS od\n    ON o.id = od.order_id\n  JOIN
+    northwind.shippers AS s\n    ON o.shipper_id = s.id\n  JOIN northwind.products
+    AS p\n    ON od.product_id = p.id\n  WHERE\n    o.order_date BETWEEN '2006-01-01'
+    AND '2006-03-31'\n) AS psc\n  ON sp.product_name = psc.product_name\nGROUP BY\n\
+    \  sp.product_name,\n  ps.company,\n  pe.first_name,\n  pr.ship_city\nORDER
+    BY\n  total_quantity_sold DESC"
+  comparison_rules:
+  - columns:
+    - product_name
+    - total_quantity_sold
+    match: exact
+  schemas:
+  - northwind
+  auto_select_schema: 'false'
+q_22:
+  query_name: q_22
+  question: Calculate the total revenue (i.e final invoiced amount), tax, and discounts
+    for each customer in Q1 2006. Include details of products purchased, suppliers
+    of those products, categories of the products, and employees who facilitated
+    the sales.
+  golden_query:
+  - "SELECT\n  customers.id AS customer_id,\n  customers.company AS customer_name,\n\
+    \  products.product_name,\n  suppliers.company AS supplier_name,\n  products.category
+    AS product_category,\n  employees.company AS employee_name,\n  SUM(invoices.amount_due)
+    AS total_revenue,\n  SUM(invoices.tax) AS total_tax,\n  SUM(order_details.discount)
+    AS total_discount\nFROM northwind.customers\nJOIN northwind.orders\n  ON customers.id
+    = orders.customer_id\nJOIN northwind.employees\n  ON orders.employee_id = employees.id\n
+    JOIN northwind.order_details\n  ON orders.id = order_details.order_id\nJOIN
+    northwind.invoices\n  ON orders.id = invoices.order_id\nJOIN northwind.products\n\
+    \  ON order_details.product_id = products.id\nJOIN northwind.suppliers\n  ON
+    products.supplier_ids = suppliers.id\nWHERE\n  orders.order_date BETWEEN '2006-01-01'
+    AND '2006-03-31'\nGROUP BY\n  customers.id,\n  customers.company,\n  products.product_name,\n\
+    \  suppliers.company,\n  products.category,\n  employees.company\nORDER BY\n\
+    \  total_revenue DESC"
+  comparison_rules:
+  - columns:
+    - total_revenue
+    - total_tax
+    match: exact
+  schemas:
+  - northwind
+  auto_select_schema: 'false'
+q_23:
+  query_name: q_23
+  question: Identify suppliers who provided goods worth more than $10,000, calculated
+    as quantity multiplied by unit cost, regardless of delivery status. Display
+    supplier name and total value supplied.
+  golden_query:
+  - "SELECT\n  suppliers.company AS supplier_name,\n  SUM(quantity * unit_cost)
+    AS total_value_supplied\nFROM northwind.purchase_order_details\nJOIN northwind.purchase_orders\n\
+    \  ON purchase_order_id = purchase_orders.id\nJOIN northwind.suppliers\n  ON
+    purchase_orders.supplier_id = suppliers.id\nGROUP BY\n  suppliers.company\n\
+    HAVING\n  SUM(quantity * unit_cost) > 10000"
+  comparison_rules:
+  - columns:
+    - '*'
+    match: exact
+  schemas:
+  - northwind
+  auto_select_schema: 'false'
+q_24:
+  query_name: q_24
+  question: Show suppliers whose products are involved in orders, where the total
+    value of the entire order exceeds $5,000. Display the supplier name and the
+    number of such orders.”
+  golden_query:
+  - "SELECT\n  T1.company AS supplier_name,\n  COUNT(DISTINCT T3.order_id) AS total_orders\n
+    FROM northwind.suppliers AS T1\nJOIN northwind.products AS T2\n  ON T1.id IN
+    (\n    SELECT\n      products.supplier_ids\n    FROM northwind.products\n  \
+    \  WHERE\n      products.id = T2.id\n  )\nJOIN northwind.order_details AS T3\n\
+    \  ON T2.id = T3.product_id\nJOIN northwind.orders AS T4\n  ON T3.order_id =
+    T4.id\nWHERE\n  NOT T4.order_date IS NULL AND T3.quantity * T3.unit_price >
+    5000\nGROUP BY\n  T1.company,\n  T2.id"
+  comparison_rules:
+  - columns:
+    - '*'
+    match: exact
+  schemas:
+  - northwind
+  auto_select_schema: 'false'
+q_25:
+  query_name: q_25
+  question: Find suppliers with the most delayed deliveries. Include supplier name,
+    number of delayed orders, and average delay in days.
+  golden_query:
+  - "SELECT\n  suppliers.company AS supplier_name,\n  COUNT(purchase_orders.id)
+    AS total_delayed_orders,\n  AVG(DATEDIFF(date_received, purchase_orders.expected_date))
+    AS average_delay_in_days\nFROM northwind.purchase_orders\nJOIN northwind.purchase_order_details\n\
+    \  ON purchase_orders.id = purchase_order_id\nJOIN northwind.suppliers\n  ON
+    purchase_orders.supplier_id = suppliers.id\nWHERE\n  NOT date_received IS NULL\n\
+    \  AND DATEDIFF(date_received, purchase_orders.expected_date) > 0\nGROUP BY\n\
+    \  suppliers.company\nORDER BY\n  average_delay_in_days DESC\nLIMIT 1"
+  comparison_rules:
+  - columns:
+    - '*'
+    match: exact
+  schemas:
+  - northwind
+  auto_select_schema: 'false'
+q_26:
+  query_name: q_26
+  question: Find the total number of orders placed in Q1 2006, grouped by their
+    current status. Display status and total orders.
+  golden_query:
+  - "SELECT\n  orders_status.status_name AS Status,\n  COUNT(orders.id) AS total_orders\n
+    FROM northwind.orders\nJOIN northwind.orders_status\n  ON orders.status_id =
+    orders_status.id\nWHERE\n  QUARTER(orders.order_date) = 1 AND YEAR(orders.order_date)
+    = 2006\nGROUP BY\n  orders_status.status_name\nORDER BY\n  total_orders"
+  comparison_rules:
+  - columns:
+    - '*'
+    match: exact
+  schemas:
+  - northwind
+  auto_select_schema: 'false'
+q_27:
+  query_name: q_27
+  question: Show the average delay in delivery for products shipped to customers
+    in each region. Include region and average delay in days.
+  golden_query:
+  - "SELECT\n  customers.state_province AS region,\n  AVG(DATEDIFF(orders.shipped_date,
+    orders.order_date)) AS average_delay\nFROM northwind.orders\nJOIN northwind.customers\n\
+    \  ON orders.customer_id = customers.id\nWHERE\n  NOT orders.shipped_date IS
+    NULL\nGROUP BY\n  customers.state_province\nORDER BY\n  average_delay"
+  comparison_rules:
+  - columns:
+    - '*'
+    match: exact
+  schemas:
+  - northwind
+  auto_select_schema: 'false'
+q_28:
+  query_name: q_28
+  question: List all orders completed in January 2006, along with customer details
+    and the total order value.
+  golden_query:
+  - "SELECT\n  orders.id,\n  customers.first_name,\n  customers.last_name,\n  customers.company,\n\
+    \  SUM(order_details.unit_price * order_details.quantity) AS total_order_value\n
+    FROM northwind.orders\nJOIN northwind.customers\n  ON orders.customer_id = customers.id\n
+    JOIN northwind.order_details\n  ON orders.id = order_details.order_id\nWHERE\n\
+    \  YEAR(orders.order_date) = 2006 AND MONTH(orders.order_date) = 1\nGROUP BY\n\
+    \  orders.id,\n  customers.first_name,\n  customers.last_name,\n  customers.company\n
+    ORDER BY\n  orders.id"
+  comparison_rules:
+  - columns:
+    - '*'
+    match: exact
+  schemas:
+  - northwind
+  auto_select_schema: 'false'
+q_29:
+  query_name: q_29
+  question: Find all orders that include products from more than 2 suppliers. Include
+    order ID and number of suppliers involved.
+  golden_query:
+  - "SELECT\n  orders.id,\n  COUNT(DISTINCT products.supplier_ids) AS total_n_suppliers\n
+    FROM northwind.orders\nJOIN northwind.order_details\n  ON orders.id = order_details.order_id\n
+    JOIN northwind.products\n  ON order_details.product_id = products.id\nGROUP
+    BY\n  orders.id\nHAVING\n  COUNT(DISTINCT products.supplier_ids) > 2"
+  comparison_rules:
+  - columns:
+    - '*'
+    match: exact
+  schemas:
+  - northwind
+  auto_select_schema: 'false'
+q_30:
+  query_name: q_30
+  question: Show all orders along with the total taxes in invoice in Q1 2006. Display
+    order ID, total taxes, and the customer’s first name
+  golden_query:
+  - "SELECT\n  orders.id,\n  customers.first_name,\n  SUM(invoices.tax) AS total_taxes\n
+    FROM northwind.invoices\nJOIN northwind.orders\n  ON invoices.order_id = orders.id\n
+    JOIN northwind.customers\n  ON orders.customer_id = customers.id\nWHERE\n  QUARTER(invoices.invoice_date)
+    = 1 AND YEAR(invoices.invoice_date) = 2006\nGROUP BY\n  orders.id,\n  customers.first_name\n
+    ORDER BY\n  orders.id"
+  comparison_rules:
+  - columns:
+    - '*'
+    match: exact
+  schemas:
+  - northwind
+  auto_select_schema: 'false'
+q_31:
+  query_name: q_31
+  question: Identify the top 10 products by total revenue generated in Q1 2006.
+    Display product name, category, and total revenue.
+  golden_query:
+  - "SELECT\n  products.product_name,\n  products.category,\n  SUM(order_details.unit_price
+    * order_details.quantity) AS total_revenue\nFROM northwind.order_details\nJOIN
+    northwind.orders\n  ON order_details.order_id = orders.id\nJOIN northwind.products\n\
+    \  ON order_details.product_id = products.id\nWHERE\n  QUARTER(orders.order_date)
+    = 1 AND YEAR(orders.order_date) = 2006\nGROUP BY\n  products.product_name,\n\
+    \  products.category\nORDER BY\n  total_revenue DESC\nLIMIT 10"
+  comparison_rules:
+  - columns:
+    - '*'
+    match: exact
+  schemas:
+  - northwind
+  auto_select_schema: 'false'
+q_32:
+  query_name: q_32
+  question: Find the total shipping fees collected for all orders delivered in Q1
+    2006, grouped by shipping company and region.
+  golden_query:
+  - "SELECT\n  shippers.company AS shipping_company,\n  shippers.state_province
+    AS region,\n  SUM(orders.shipping_fee) AS total_shipping_fees\nFROM northwind.orders\n
+    JOIN northwind.shippers\n  ON orders.shipper_id = shippers.id\nWHERE\n  orders.shipped_date
+    BETWEEN '2006-01-01' AND '2006-03-31'\nGROUP BY\n  shippers.company,\n  shippers.state_province"
+  comparison_rules:
+  - columns:
+    - '*'
+    match: exact
+  schemas:
+  - northwind
+  auto_select_schema: 'false'
+q_33:
+  query_name: q_33
+  question: Identify the employees who sold products from discontinued categories
+    during Q1 2006, along with the total sales of such products.
+  golden_query:
+  - "SELECT\n  employees.id AS employee_id,\n  employees.first_name,\n  employees.last_name,\n\
+    \  SUM(order_details.quantity) AS total_quantity_sold,\n  SUM(order_details.unit_price
+    * order_details.quantity) AS total_sales\nFROM northwind.employees\nJOIN northwind.orders\n\
+    \  ON employees.id = orders.employee_id\nJOIN northwind.order_details\n  ON
+    orders.id = order_details.order_id\nJOIN northwind.products\n  ON order_details.product_id
+    = products.id\nWHERE\n  products.discontinued = 1 AND orders.order_date BETWEEN
+    '2006-01-01' AND '2006-03-31'\nGROUP BY\n  employees.id,\n  employees.first_name,\n\
+    \  employees.last_name\nORDER BY\n  total_sales DESC"
+  comparison_rules:
+  - columns:
+    - '*'
+    match: exact
+  schemas:
+  - northwind
+  auto_select_schema: 'false'
+q_34:
+  query_name: q_34
+  question: List customers who placed orders with a shipping fee exceeding $100
+    in the year 2006. Include customer first name, last name, and the total shipping
+    fee.
+  golden_query:
+  - "SELECT\n  customers.first_name,\n  customers.last_name,\n  SUM(orders.shipping_fee)
+    AS total_shipping_fee\nFROM northwind.orders\nJOIN northwind.customers\n  ON
+    orders.customer_id = customers.id\nWHERE\n  orders.shipping_fee > 100 AND YEAR(orders.order_date)
+    = 2006\nGROUP BY\n  customers.first_name,\n  customers.last_name"
+  comparison_rules:
+  - columns:
+    - '*'
+    match: exact
+  schemas:
+  - northwind
+  auto_select_schema: 'false'
+q_35:
+  query_name: q_35
+  question: Calculate the total revenue (final invoiced amount), tax, and discounts for each customer in Q1 2006. 
+    Include the products they purchased, the suppliers of those products, the product categories, 
+    and the employees who facilitated the sales, based on aggregated sales and invoices.
+  golden_query:
+  - "WITH customer_orders AS (\n  SELECT\n    o.customer_id,\n    c.company AS customer_name,\n\
+    \    o.id AS order_id,\n    e.first_name AS employee_name,\n    od.product_id,\n\
+    \    p.product_name,\n    p.category,\n    p.supplier_ids,\n    od.unit_price,\n\
+    \    od.quantity,\n    od.discount,\n    i.amount_due,\n    i.tax\n  FROM northwind.orders
+    AS o\n  JOIN northwind.customers AS c\n    ON o.customer_id = c.id\n  JOIN northwind.employees
+    AS e\n    ON o.employee_id = e.id\n  JOIN northwind.order_details AS od\n  \
+    \  ON o.id = od.order_id\n  JOIN northwind.invoices AS i\n    ON o.id = i.order_id\n\
+    \  JOIN northwind.products AS p\n    ON od.product_id = p.id\n  WHERE\n    o.order_date
+    BETWEEN '2006-01-01' AND '2006-03-31'\n), customer_revenue AS (\n  SELECT\n\
+    \    customer_id,\n    customer_name,\n    SUM(amount_due) AS total_revenue,\n\
+    \    SUM(tax) AS total_tax,\n    SUM(discount) AS total_discount,\n    GROUP_CONCAT(DISTINCT
+    product_name SEPARATOR ',') AS products_purchased,\n    GROUP_CONCAT(DISTINCT
+    supplier_ids SEPARATOR ',') AS suppliers,\n    GROUP_CONCAT(DISTINCT category
+    SEPARATOR ',') AS categories,\n    GROUP_CONCAT(DISTINCT employee_name SEPARATOR
+    ',') AS employees\n  FROM customer_orders\n  GROUP BY\n    customer_id,\n  \
+    \  customer_name,\n    product_name,\n    supplier_ids,\n    category,\n   \
+    \ employee_name\n)\nSELECT\n  customer_revenue.customer_id,\n  customer_revenue.customer_name,\n\
+    \  customer_revenue.total_revenue,\n  customer_revenue.total_tax,\n  customer_revenue.total_discount,\n\
+    \  customer_revenue.products_purchased,\n  customer_revenue.suppliers,\n  customer_revenue.categories,\n\
+    \  customer_revenue.employees\nFROM customer_revenue"
+  comparison_rules:
+  - columns:
+    - '*'
+    match: exact
+  schemas:
+  - northwind
+  auto_select_schema: 'false'
+q_36:
+  query_name: q_36
+  question: Identify the customer regions with the highest average profit margins
+    for products sold in Q1 2006. Display the region, average profit margin, total
+    revenue, and total costs.
+  golden_query:
+  - "SELECT\n  customers.state_province AS region,\n  AVG(\n    (\n      order_details.unit_price
+    * order_details.quantity\n    ) - (\n      products.standard_cost * order_details.quantity\n\
+    \    )\n  ) / NULLIF((\n    order_details.unit_price * order_details.quantity\n\
+    \  ), 0) AS average_profit_margin,\n  SUM(order_details.unit_price * order_details.quantity)
+    AS total_revenue,\n  SUM(products.standard_cost * order_details.quantity) AS
+    total_costs\nFROM northwind.customers\nJOIN northwind.orders\n  ON northwind.customers.id
+    = orders.customer_id\nJOIN northwind.order_details\n  ON northwind.orders.id
+    = order_details.order_id\nJOIN northwind.products\n  ON order_details.product_id
+    = northwind.products.id\nWHERE\n  orders.order_date >= '2006-01-01' AND orders.order_date
+    < '2006-04-01'\nGROUP BY\n  customers.state_province,\n  order_details.unit_price,\n\
+    \  order_details.quantity\nORDER BY\n  average_profit_margin DESC"
+  - "SELECT\n  customers.state_province AS region,\n  AVG(\n    (\n      order_details.unit_price
+    * order_details.quantity\n    ) - (\n      products.standard_cost * order_details.quantity\n\
+    \    )\n  ) / NULLIF((\n    order_details.unit_price * order_details.quantity\n\
+    \  ), 0) AS average_profit_margin,\n  SUM(order_details.unit_price * order_details.quantity)
+    AS total_revenue,\n  SUM(products.standard_cost * order_details.quantity) AS
+    total_costs\nFROM northwind.customers\nJOIN northwind.orders\n  ON northwind.customers.id
+    = orders.customer_id\nJOIN northwind.order_details\n  ON northwind.orders.id
+    = order_details.order_id\nJOIN northwind.products\n  ON order_details.product_id
+    = northwind.products.id\nWHERE\n  orders.order_date >= '2006-01-01' AND orders.order_date
+    < '2006-04-01'\nGROUP BY\n  customers.state_province,\n  order_details.unit_price,\n\
+    \  order_details.quantity\nORDER BY\n  average_profit_margin DESC \nLIMIT 1"
+  comparison_rules:
+  - columns:
+    - '*'
+    match: exact
+  schemas:
+  - northwind
+  auto_select_schema: 'false'
+q_37:
+  query_name: q_37
+  question: Identify all delayed orders in Q1 2006. For each order, calculate the
+    delay in days and include the customer’s name, the products purchased, their
+    categories, the suppliers of those products, the employees who handled the orders,
+    the shipping companies used, and the total taxes and discounts applied.
+  golden_query:
+  - "WITH delayed_orders AS (\n  SELECT\n    o.id,\n    o.order_date,\n    o.shipped_date,\n\
+    \    o.status_id,\n    os.status_name,\n    c.first_name AS customer_first_name,\n\
+    \    c.last_name AS customer_last_name,\n    e.first_name AS employee_first_name,\n\
+    \    e.last_name AS employee_last_name,\n    s.company AS shipping_company,\n\
+    \    p.product_name,\n    p.category,\n    su.company AS supplier,\n    SUM(od.quantity
+    * od.unit_price) AS total_revenue,\n    SUM(od.quantity * od.unit_price * od.discount)
+    AS total_discounts,\n    SUM(o.taxes) AS total_taxes,\n    DATEDIFF(o.shipped_date,
+    o.order_date) AS delay_in_days\n  FROM northwind.orders AS o\n  JOIN northwind.customers
+    AS c\n    ON o.customer_id = c.id\n  JOIN northwind.employees AS e\n    ON o.employee_id
+    = e.id\n  JOIN northwind.shippers AS s\n    ON o.shipper_id = s.id\n  JOIN northwind.orders_status
+    AS os\n    ON o.status_id = os.id\n  JOIN northwind.order_details AS od\n  \
+    \  ON o.id = od.order_id\n  JOIN northwind.products AS p\n    ON od.product_id
+    = p.id\n  JOIN northwind.suppliers AS su\n    ON p.supplier_ids = su.id\n  WHERE\n\
+    \    o.order_date >= '2006-01-01'\n    AND o.order_date < '2006-04-01'\n   \
+    \ AND NOT o.shipped_date IS NULL\n    AND os.status_name = 'Shipped'\n  GROUP
+    BY\n    o.id,\n    o.order_date,\n    o.shipped_date,\n    o.status_id,\n  \
+    \  os.status_name,\n    c.first_name,\n    c.last_name,\n    e.first_name,\n\
+    \    e.last_name,\n    s.company,\n    p.product_name,\n    p.category,\n  \
+    \  su.company\n), customer_info AS (\n  SELECT\n    customers.id,\n    CONCAT(customers.first_name,
+    ' ', customers.last_name) AS customer_name\n  FROM northwind.customers\n)\n\
+    SELECT\n  do.id AS order_id,\n  ci.customer_name,\n  GROUP_CONCAT(DISTINCT do.product_name
+    SEPARATOR ',') AS products_purchased,\n  GROUP_CONCAT(DISTINCT do.category SEPARATOR
+    ',') AS product_categories,\n  GROUP_CONCAT(DISTINCT do.supplier SEPARATOR ',')
+    AS product_suppliers,\n  CONCAT(e.first_name, ' ', e.last_name) AS employees,\n\
+    \  do.shipping_company,\n  do.total_taxes,\n  do.total_discounts,\n  do.delay_in_days\n
+    FROM delayed_orders AS do\nJOIN customer_info AS ci\n  ON do.id = ci.id\nJOIN
+    northwind.employees AS e\n  ON do.employee_first_name = e.first_name AND do.employee_last_name
+    = e.last_name\nGROUP BY\n  do.id,\n  ci.customer_name,\n  do.shipping_company,\n\
+    \  do.total_taxes,\n  do.total_discounts,\n  do.delay_in_days,\n  do.product_name,\n\
+    \  do.category,\n  do.supplier,\n  e.first_name,\n  e.last_name\nORDER BY\n\
+    \  do.delay_in_days DESC"
+  comparison_rules:
+  - columns:
+    - '*'
+    match: exact
+  schemas:
+  - northwind
+  auto_select_schema: 'false'
+q_38:
+  query_name: q_38
+  question: Calculate the rank of each shipping company based on the average delivery
+    time of orders in Q1 2006. For each company, include the number of orders shipped,
+    the total shipping fees collected, the regions where the orders were delivered,
+    the employees who facilitated the sales, and the products and suppliers involved
+    in the shipments
+  golden_query:
+  - "WITH ranked_shippers AS (\n  SELECT\n    shippers.company AS shipping_company,\n\
+    \    AVG(DATEDIFF(orders.shipped_date, orders.order_date)) AS average_delivery_time,\n\
+    \    COUNT(orders.id) AS number_of_orders,\n    SUM(orders.shipping_fee) AS
+    total_shipping_fees,\n    GROUP_CONCAT(DISTINCT orders.ship_city SEPARATOR ',')
+    AS regions,\n    GROUP_CONCAT(DISTINCT employees.first_name SEPARATOR ',') AS
+    employees,\n    GROUP_CONCAT(DISTINCT products.product_name SEPARATOR ',') AS
+    products,\n    GROUP_CONCAT(DISTINCT suppliers.company SEPARATOR ',') AS suppliers,\n\
+    \    ROW_NUMBER() OVER (ORDER BY AVG(DATEDIFF(orders.shipped_date, orders.order_date)))
+    AS `rank`\n  FROM northwind.orders\n  JOIN northwind.shippers\n    ON orders.shipper_id
+    = shippers.id\n  JOIN northwind.employees\n    ON orders.employee_id = employees.id\n\
+    \  JOIN northwind.order_details\n    ON orders.id = order_details.order_id\n\
+    \  JOIN northwind.products\n    ON order_details.product_id = products.id\n\
+    \  JOIN northwind.purchase_order_details\n    ON products.id = purchase_order_details.product_id\n\
+    \  JOIN northwind.suppliers\n    ON purchase_order_details.product_id = suppliers.id\n\
+    \  WHERE\n    orders.order_date BETWEEN '2006-01-01' AND '2006-03-31'\n  GROUP
+    BY\n    shippers.company,\n    orders.ship_city,\n    employees.first_name,\n\
+    \    products.product_name,\n    suppliers.company\n)\nSELECT\n  shipping_company,\n\
+    \  rank,\n  number_of_orders,\n  total_shipping_fees,\n  regions,\n  employees,\n\
+    \  products,\n  suppliers\nFROM ranked_shippers\nORDER BY\n  rank"
+  comparison_rules:
+  - columns:
+    - '*'
+    match: exact
+  schemas:
+  - northwind
+  auto_select_schema: 'false'
+q_39:
+  query_name: q_39
+  question: List all products that are in the ‘Beverages’ category and are not marked
+    as discontinued. Display product_name, list_price, standard_cost.
+  golden_query:
+  - "SELECT\n  product_name,\n  list_price,\n  standard_cost\nFROM northwind.products\n\
+    WHERE\n  category = 'Beverages' AND discontinued = 0"
+  comparison_rules:
+  - columns:
+    - '*'
+    match: exact
+  schemas:
+  - northwind
+  auto_select_schema: 'false'
+q_40:
+  query_name: q_40
+  question: Show all employees who have a title containing ‘Manager’ and are located
+    in the region Washington. Display their first name, last name, job title, city,
+    state_province.
+  golden_query:
+  - "SELECT\n  first_name,\n  last_name,\n  job_title,\n  city,\n  state_province\n
+    FROM northwind.employees\nWHERE\n  job_title LIKE '%Manager%' AND state_province
+    = 'WA'"
+  comparison_rules:
+  - columns:
+    - '*'
+    match: exact
+  schemas:
+  - northwind
+  auto_select_schema: 'false'
+q_41:
+  query_name: q_41
+  question: Find the total quantity of products that have not been discontinued,
+    using the quantity specified in the products table. Display product name and
+    total quantity.
+  golden_query:
+  - "SELECT\n  product_name,\n  SUM(reorder_level) AS total_quantity\nFROM northwind.products\n\
+    WHERE\n  discontinued = 0\nGROUP BY\n  product_name\nORDER BY\n  total_quantity"
+  comparison_rules:
+  - columns:
+    - '*'
+    match: exact
+  schemas:
+  - northwind
+  auto_select_schema: 'false'
+q_42:
+  query_name: q_42
+  question: Show me the products that were ordered with unit price higher than 25$
+    and its total order value > 500$. Display product name and its total order value
+  golden_query:
+  - "SELECT\n  products.product_name,\n  SUM(order_details.unit_price * order_details.quantity)
+    AS total_order_value\nFROM northwind.order_details\nJOIN northwind.products\n\
+    \  ON order_details.product_id = products.id\nWHERE\n  order_details.unit_price
+    > 25\nGROUP BY\n  products.product_name\nHAVING\n  SUM(order_details.unit_price
+    * order_details.quantity) > 500"
+  comparison_rules:
+  - columns:
+    - '*'
+    match: exact
+  schemas:
+  - northwind
+  auto_select_schema: 'false'
+q_43:
+  query_name: q_43
+  question: Identify the most frequently ordered product by each customer in Q1
+    2006. Include the customer’s name, product name, and the number of times it
+    was ordered. Display customer name (first name and last name separately), product
+    name, order count
+  golden_query:
+  - "WITH ranked_products AS (\n  SELECT\n    customers.first_name,\n    customers.last_name,\n\
+    \    products.product_name,\n    COUNT(order_details.id) AS order_count,\n \
+    \   ROW_NUMBER() OVER (PARTITION BY customers.id ORDER BY COUNT(order_details.id)
+    DESC) AS row_num\n  FROM northwind.orders\n  JOIN northwind.order_details\n\
+    \    ON orders.id = order_details.order_id\n  JOIN northwind.customers\n   \
+    \ ON orders.customer_id = customers.id\n  JOIN northwind.products\n    ON order_details.product_id
+    = products.id\n  WHERE\n    orders.order_date BETWEEN '2006-01-01' AND '2006-03-31'\n\
+    \  GROUP BY\n    customers.id,\n    products.id,\n    customers.first_name,\n\
+    \    customers.last_name,\n    products.product_name\n)\nSELECT\n  first_name,
+    last_name,\n  product_name,\n  order_count\nFROM ranked_products\nWHERE\n  row_num
+    = 1"
+  comparison_rules:
+  - columns:
+    - '*'
+    match: exact
+  schemas:
+  - northwind
+  auto_select_schema: 'false'
+q_44:
+  query_name: q_44
+  question: Calculate the rank of each customer based on their total revenue generated
+    in Q1 2006. Include customer name, total revenue (based on invoiced amount),
+    and their rank. Display customer name (first name and last name separately),
+    total revenue, rank
+  golden_query:
+  - "SELECT\n  customers.first_name,\n  customers.last_name,\n  SUM(invoices.amount_due
+    + orders.shipping_fee + orders.taxes) AS total_revenue,\n  RANK() OVER (ORDER
+    BY SUM(invoices.amount_due + orders.shipping_fee + orders.taxes) DESC) AS `rank`\n
+    FROM northwind.customers\nJOIN northwind.orders\n  ON customers.id = orders.customer_id\n
+    JOIN northwind.invoices\n  ON orders.id = invoices.order_id\nWHERE\n  QUARTER(orders.order_date)
+    = 1 AND YEAR(orders.order_date) = 2006\nGROUP BY\n  customers.first_name,\n\
+    \  customers.last_name"
+  comparison_rules:
+  - columns:
+    - '*'
+    match: exact
+  schemas:
+  - northwind
+  auto_select_schema: 'false'
+q_45:
+  query_name: q_45
+  question: Determine the running total of revenue for each supplier in Q1 2006, based on the total cost of purchased items. 
+    Order the results by the creation date of the orders. Include supplier name, order date, and cumulative revenue.
+  golden_query:
+  - "SELECT\n  suppliers.company AS supplier_name,\n  purchase_orders.creation_date
+    AS order_date,\n  SUM(unit_cost * quantity) OVER (PARTITION BY suppliers.company
+    ORDER BY purchase_orders.creation_date) AS cumulative_revenue\nFROM northwind.purchase_orders\n
+    JOIN northwind.purchase_order_details\n  ON purchase_orders.id = purchase_order_id\n
+    JOIN northwind.suppliers\n  ON purchase_orders.supplier_id = suppliers.id\n\
+    WHERE\n  purchase_orders.creation_date BETWEEN '2006-01-01' AND '2006-03-31'\n\
+    \  AND NOT date_received IS NULL\nGROUP BY\n  suppliers.company,\n  purchase_orders.creation_date,\n\
+    \  unit_cost,\n  quantity\nORDER BY\n  purchase_orders.creation_date"
+  comparison_rules:
+  - columns:
+    - '*'
+    match: exact
+  schemas:
+  - northwind
+  auto_select_schema: 'false'
+q_46:
+  query_name: q_46
+  question: For each product category, calculate the total revenue and total discounts
+    in Q1 2006. Rank the categories based on their total revenue, ensuring no gaps
+    in the ranking for categories with the same revenue
+  golden_query:
+  - "SELECT\n  products.category,\n  SUM(order_details.unit_price * order_details.quantity)
+    AS total_revenue,\n  SUM(order_details.discount * order_details.quantity) AS
+    total_discounts,\n  DENSE_RANK() OVER (ORDER BY SUM(order_details.unit_price
+    * order_details.quantity) DESC) AS `rank`\nFROM northwind.order_details\nJOIN
+    northwind.orders\n  ON order_details.order_id = orders.id\nJOIN northwind.products\n\
+    \  ON order_details.product_id = products.id\nWHERE\n  orders.order_date BETWEEN
+    '2006-01-01' AND '2006-03-31'\nGROUP BY\n  products.category\nORDER BY\n  total_revenue
+    DESC"
+  comparison_rules:
+  - columns:
+    - '*'
+    match: exact
+  schemas:
+  - northwind
+  auto_select_schema: 'false'
+q_47:
+  query_name: q_47
+  question: Determine the top 5 customers by total revenue in Q1 2006. Include the
+    customer’s name, the total revenue generated, the products purchased, their
+    suppliers, and the employees who facilitated the sales
+  golden_query:
+  - "WITH customer_revenue AS (\n  SELECT\n    c.first_name,\n    c.last_name,\n\
+    \    SUM(od.unit_price * od.quantity) AS total_revenue,\n    GROUP_CONCAT(DISTINCT
+    p.product_name SEPARATOR ',') AS products_purchased,\n    GROUP_CONCAT(DISTINCT
+    p.supplier_ids SEPARATOR ',') AS suppliers,\n    e.first_name AS employee_name\n\
+    \  FROM northwind.orders AS o\n  JOIN northwind.customers AS c\n    ON o.customer_id
+    = c.id\n  JOIN northwind.employees AS e\n    ON o.employee_id = e.id\n  JOIN
+    northwind.order_details AS od\n    ON o.id = od.order_id\n  JOIN northwind.products
+    AS p\n    ON od.product_id = p.id\n  WHERE\n    o.order_date BETWEEN '2006-01-01'
+    AND '2006-03-31'\n  GROUP BY\n    c.first_name,\n    c.last_name,\n    e.first_name,\n\
+    \    p.product_name,\n    p.supplier_ids\n), ranked_customers AS (\n  SELECT\n\
+    \    *,\n    ROW_NUMBER() OVER (ORDER BY total_revenue DESC) AS `rank`\n  FROM
+    customer_revenue\n)\nSELECT\n  ranked_customers.first_name,\n  ranked_customers.last_name
+    AS customer_name,\n  ranked_customers.total_revenue,\n  ranked_customers.products_purchased,\n\
+    \  ranked_customers.suppliers,\n  ranked_customers.employee_name AS employees\n
+    FROM ranked_customers\nWHERE\n  ranked_customers.rank <= 5"
+  comparison_rules:
+  - columns:
+    - '*'
+    match: exact
+  schemas:
+  - northwind
+  auto_select_schema: 'false'
+q_48:
+  query_name: q_48
+  question: Calculate the total revenue, taxes, and discounts for each customer
+    in Q1 2006, including the products they purchased, the employees managing their
+    sales, and the suppliers of those products. Additionally, rank the customers
+    based on their total revenue and include a running total of revenue across all
+    customers.
+  golden_query:
+  - "WITH customer_orders AS (\n  SELECT\n    o.customer_id,\n    c.company AS customer_name,\n\
+    \    e.first_name AS employee_name,\n    p.product_name,\n    s.company AS supplier_name,\n\
+    \    o.order_date,\n    od.unit_price * od.quantity AS revenue,\n    od.discount,\n\
+    \    o.taxes\n  FROM northwind.orders AS o\n  JOIN northwind.customers AS c\n\
+    \    ON o.customer_id = c.id\n  JOIN northwind.employees AS e\n    ON o.employee_id
+    = e.id\n  JOIN northwind.order_details AS od\n    ON o.id = od.order_id\n  JOIN
+    northwind.products AS p\n    ON od.product_id = p.id\n  JOIN northwind.suppliers
+    AS s\n    ON p.supplier_ids = s.id\n), q1_orders AS (\n  SELECT\n    *\n  FROM
+    customer_orders\n  WHERE\n    order_date BETWEEN '2006-01-01' AND '2006-03-31'\n
+    ), revenue_rank AS (\n  SELECT\n    q1_orders.customer_id,\n    q1_orders.customer_name,\n\
+    \    q1_orders.product_name,\n    q1_orders.employee_name,\n    q1_orders.supplier_name,\n\
+    \    SUM(q1_orders.revenue) AS total_revenue,\n    SUM(q1_orders.discount) AS
+    total_discounts,\n    SUM(q1_orders.taxes) AS total_taxes,\n    RANK() OVER
+    (ORDER BY SUM(q1_orders.revenue) DESC) AS revenue_rank\n  FROM q1_orders\n \
+    \ GROUP BY\n    q1_orders.customer_id,\n    q1_orders.customer_name,\n    q1_orders.product_name,\n\
+    \    q1_orders.employee_name,\n    q1_orders.supplier_name\n), running_total
+    AS (\n  SELECT\n    revenue_rank.customer_id,\n    revenue_rank.customer_name,\n\
+    \    revenue_rank.product_name,\n    revenue_rank.employee_name,\n    revenue_rank.supplier_name,\n\
+    \    revenue_rank.total_revenue,\n    revenue_rank.total_discounts,\n    revenue_rank.total_taxes,\n\
+    \    revenue_rank.revenue_rank,\n    SUM(revenue_rank.total_revenue) OVER (ORDER
+    BY revenue_rank.revenue_rank) AS running_total_revenue\n  FROM revenue_rank\n\
+    \  GROUP BY\n    revenue_rank.customer_id,\n    revenue_rank.customer_name,\n\
+    \    revenue_rank.product_name,\n    revenue_rank.employee_name,\n    revenue_rank.supplier_name,\n\
+    \    revenue_rank.total_revenue,\n    revenue_rank.total_discounts,\n    revenue_rank.total_taxes,\n\
+    \    revenue_rank.revenue_rank\n)\nSELECT\n  running_total.customer_id,\n  running_total.customer_name,\n\
+    \  running_total.product_name,\n  running_total.employee_name,\n  running_total.supplier_name,\n\
+    \  running_total.total_revenue,\n  running_total.total_discounts,\n  running_total.total_taxes,\n\
+    \  running_total.revenue_rank,\n  running_total.running_total_revenue\nFROM
+    running_total\nORDER BY\n  revenue_rank"
+  comparison_rules:
+  - columns:
+    - '*'
+    match: exact
+  schemas:
+  - northwind
+  auto_select_schema: 'false'
+q_49:
+  query_name: q_49
+  question: '    List employees who sold products that have not been discontinued
+    in Q1 2006, along with the total units sold and the product categories. Display
+    first name and last name, category, and total units sold.'
+  golden_query:
+  - "SELECT\n  employees.first_name,\n  employees.last_name,\n  products.category,\n\
+    \  SUM(order_details.quantity) AS total_units_sold\nFROM northwind.order_details\n
+    JOIN northwind.products\n  ON order_details.product_id = products.id\nJOIN northwind.orders\n\
+    \  ON order_details.order_id = orders.id\nJOIN northwind.employees\n  ON orders.employee_id
+    = employees.id\nWHERE\n  products.discontinued = 0\n  AND orders.order_date
+    >= '2006-01-01'\n  AND orders.order_date < '2006-04-01'\nGROUP BY\n  employees.first_name,\n\
+    \  employees.last_name,\n  products.category\nORDER BY\n  total_units_sold"
+  comparison_rules:
+  - columns:
+    - '*'
+    match: exact
+  schemas:
+  - northwind
+  auto_select_schema: 'false'
+q_50:
+  query_name: q_50
+  question: For each employee who sold products in Q1 2006, calculate the total quantities sold, grouped by product category. 
+    Display employee name, product category, and total units sold.
+  golden_query:
+  - "SELECT\n  employees.first_name,\n  employees.last_name,\n  products.category,\n\
+    \  SUM(order_details.quantity) AS total_units_sold\nFROM northwind.order_details\n
+    JOIN northwind.products\n  ON order_details.product_id = products.id\nJOIN northwind.orders\n\
+    \  ON order_details.order_id = orders.id\nJOIN northwind.employees\n  ON orders.employee_id
+    = employees.id\nWHERE\n  products.discontinued = 0\n  AND orders.order_date
+    >= '2006-01-01'\n  AND orders.order_date < '2006-04-01'\nGROUP BY\n  employees.first_name,\n\
+    \  employees.last_name,\n  products.category\nORDER BY\n  total_units_sold"
+  comparison_rules:
+  - columns:
+    - product_name
+    - category
+    - total_units_sold
+    match: exact
+  schemas:
+  - northwind
+  auto_select_schema: 'false'

@@ -1,0 +1,242 @@
+[
+  {
+    "id": null,
+    "statement": "NEVER use a subquery in select clause, no matter if it is correlated or uncorrelated. Choose the right way to use correlated/uncorrelated subquery in WHERE, FROM, HAVING, etc.",
+    "labels": [
+      "sql"
+    ],
+    "scope": "*",
+    "always_include": true,
+    "critical": false,
+    "lookup_summaries": null,
+    "summarization_prompt": null,
+    "user_id": "*",
+    "tenant_id": "*",
+    "org_id": "*"
+  },
+  {
+    "id": "0ea45791-11f2-42c7-b24b-dfd8e9cd4408",
+    "statement": "When calculating the total orders fulfilled by suppliers, include only purchase orders where date_received IS NOT NULL to reflect actual fulfilled orders. This should be retrieved from purchase_order_details table.",
+    "labels": [
+      "purchase_order_details",
+      "sql"
+    ],
+    "scope": "northwind",
+    "always_include": true,
+    "critical": false,
+    "lookup_summaries": [],
+    "summarization_prompt": "",
+    "user_id": "*",
+    "tenant_id": "*",
+    "org_id": "*"
+  },
+  {
+    "id": "3d813a42-237e-4755-811e-c63e409f30c0",
+    "statement": "tax_status can be one of \"Tax Exempt\" or \"Taxable\"",
+    "labels": [
+      "tax status, 23-Jan-2025",
+      "domain"
+    ],
+    "scope": "northwind.orders_tax_status",
+    "always_include": true,
+    "critical": false,
+    "lookup_summaries": [],
+    "summarization_prompt": "",
+    "user_id": "*",
+    "tenant_id": "*",
+    "org_id": "*"
+  },
+  {
+    "id": "50fc684c-c6d2-4b65-91f6-f52864d264b9",
+    "statement": "Calculate delivery delays using the difference between date_received and expected_date, including only completed orders where date_received is not NULL.",
+    "labels": [
+      "delivery delay",
+      "sql"
+    ],
+    "scope": "northwind.purchase_orders",
+    "always_include": true,
+    "critical": false,
+    "lookup_summaries": [],
+    "summarization_prompt": "",
+    "user_id": "*",
+    "tenant_id": "*",
+    "org_id": "*"
+  },
+  {
+    "id": "5ebc4522-bf33-4b0e-813a-29760ca8e37c",
+    "statement": "When calculating the total value of purchase orders awaiting delivery, filter undelivered items by checking date_received IS NULL in the purchase_order_details table and sum the corresponding payment amounts.",
+    "labels": [
+      "undelivered items, 23-Jan-2025",
+      "sql"
+    ],
+    "scope": "northwind",
+    "always_include": true,
+    "critical": false,
+    "lookup_summaries": [],
+    "summarization_prompt": "",
+    "user_id": "*",
+    "tenant_id": "*",
+    "org_id": "*"
+  },
+  {
+    "id": "7be3b67b-6f2a-4efa-91b6-e0ac22616663",
+    "statement": "purchase order status can be one of \"New,Submitted,Approved,Closed\"",
+    "labels": [
+      "purchase_order_status, 23-Jan-2025",
+      "domain"
+    ],
+    "scope": "northwind.purchase_order_status",
+    "always_include": true,
+    "critical": false,
+    "lookup_summaries": [],
+    "summarization_prompt": "",
+    "user_id": "*",
+    "tenant_id": "*",
+    "org_id": "*"
+  },
+  {
+    "id": "944ac90d-41c5-4b93-b0a0-414f5301a75e",
+    "statement": "When asked about the time taken to settle invoices, calculate the average time between the invoice_date (when the invoice was created) and the paid_date (when the invoice was fully settled). Use the orders table to access the paid_date field and exclude invoices with NULL paid_date to ensure the calculation reflects actual settlements.",
+    "labels": [
+      "invoice settlement, 23-Jan-2025, rajesh",
+      "sql"
+    ],
+    "scope": "northwind",
+    "always_include": true,
+    "critical": false,
+    "lookup_summaries": [],
+    "summarization_prompt": "",
+    "user_id": "*",
+    "tenant_id": "*",
+    "org_id": "*"
+  },
+  {
+    "id": "a945638b-2fcd-44d2-947a-25f7c1618ba3",
+    "statement": "Ensure to compute moving average, cumulative sum/average etc with window functions",
+    "labels": [
+      "window",
+      "sql"
+    ],
+    "scope": "northwind",
+    "always_include": true,
+    "critical": false,
+    "lookup_summaries": [],
+    "summarization_prompt": "",
+    "user_id": "*",
+    "tenant_id": "*",
+    "org_id": "*"
+  },
+  {
+    "id": "b6066497-a919-4159-93fd-f91ffa285225",
+    "statement": "Total profit margin is calculated as the difference between total product revenue (unit price × quantity) and total product costs (standard cost × quantity).",
+    "labels": [
+      "profit_margin",
+      "domain"
+    ],
+    "scope": "northwind",
+    "always_include": true,
+    "critical": false,
+    "lookup_summaries": [],
+    "summarization_prompt": "",
+    "user_id": "*",
+    "tenant_id": "*",
+    "org_id": "*"
+  },
+  {
+    "id": "date_diff_mariadb_northwind",
+    "statement": "Use `datediff` function when date differences have to be computed",
+    "labels": [
+      "datediff, 24-Jan-2025",
+      "sql"
+    ],
+    "scope": "northwind",
+    "always_include": true,
+    "critical": false,
+    "lookup_summaries": [],
+    "summarization_prompt": "",
+    "user_id": "*",
+    "tenant_id": "*",
+    "org_id": "*"
+  },
+  {
+    "id": "dbbffe29-c58c-480f-b8e5-e56660b8652a",
+    "statement": "NEVER use a subquery in select clause, no matter if it is correlated or uncorrelated. Choose the right way to use correlated/uncorrelated subquery in WHERE, FROM, HAVING, etc.",
+    "labels": [
+      "sql"
+    ],
+    "scope": "*",
+    "always_include": true,
+    "critical": false,
+    "lookup_summaries": null,
+    "summarization_prompt": null,
+    "user_id": "*",
+    "tenant_id": "*",
+    "org_id": "*"
+  },
+  {
+    "id": "e80c3cf1-cd02-4e77-ba3b-713fdc4f8fc0",
+    "statement": "Order details status can be one of the following status: \"None,Allocated,Invoiced,Shipped,On Order,No Stock\"",
+    "labels": [
+      "status, 23-Jan-2025",
+      "domain"
+    ],
+    "scope": "northwind.order_details_status.status_name",
+    "always_include": true,
+    "critical": false,
+    "lookup_summaries": [],
+    "summarization_prompt": "",
+    "user_id": "*",
+    "tenant_id": "*",
+    "org_id": "*"
+  },
+  {
+    "id": "f9333b6c-1fa7-4c86-8eff-050c286f2616",
+    "statement": "inventory_transaction_types can be of 4 types namely \"Purchased, Sold, On Hold, Waste\"",
+    "labels": [
+      "types, 23-Jan-2025",
+      "domain"
+    ],
+    "scope": "northwind.inventory_transaction_types",
+    "always_include": true,
+    "critical": false,
+    "lookup_summaries": [],
+    "summarization_prompt": "",
+    "user_id": "*",
+    "tenant_id": "*",
+    "org_id": "*"
+  },
+  {
+    "id": "northwind_order_status",
+    "statement": "When you need to find order status, ensure that you check the status name field in the orders_status table. For e.g, do not assume that when shipped_date is null, it will be in shipped state or so. Do proper analysis on the status names.",
+    "labels": [
+      "order status",
+      "24-Jan-2025",
+      "sql"
+    ],
+    "scope": "northwind",
+    "always_include": true,
+    "critical": false,
+    "lookup_summaries": [],
+    "summarization_prompt": "",
+    "user_id": "*",
+    "tenant_id": "*",
+    "org_id": "*"
+  },
+  {
+    "id": "northwind_supplied_implicit_meaning",
+    "statement": "The term supplied implicitly means that the items/products have been received. So it makes sense to include \"date_received IS NULL\" in the purchase_order_details table",
+    "labels": [
+      "supplied_implicit_meaning",
+      "24-Jan-2025",
+      "sql"
+    ],
+    "scope": "northwind",
+    "always_include": true,
+    "critical": false,
+    "lookup_summaries": [],
+    "summarization_prompt": "",
+    "user_id": "*",
+    "tenant_id": "*",
+    "org_id": "*"
+  }
+]

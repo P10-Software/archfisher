@@ -218,7 +218,10 @@ class BenchmarkBase:
         """
         task_result = self.generate_query(query_info=query_info)
         task_result.generated_query = task_result.generated_query
-        query_info['golden_query'] = query_info['golden_query']
+        golden_query = query_info['golden_query']
+        if golden_query and isinstance(golden_query, list):
+            golden_query = golden_query[0]
+        query_info['golden_query'] = golden_query
         tables = query_info.get(TABLES, None)
         task_result.golden_query_tables = tables
         if str(task_result.generated_query).strip() == str(query_info[GOLDEN_QUERY]).strip():
@@ -248,7 +251,10 @@ class BenchmarkBase:
 
             # Run golden query in source database
             try:
-                golden_query_result, golden_query_runtime = self.run_query(query_info[GOLDEN_QUERY],
+                golden_query = query_info[GOLDEN_QUERY]
+                if golden_query and isinstance(golden_query, list):
+                    golden_query = golden_query[0]
+                golden_query_result, golden_query_runtime = self.run_query(golden_query,
                                                                            db_connector=self.source_db_connector)
                 task_result.golden_query_runtime = golden_query_runtime
                 logging.info(f"Golden query and runtime "

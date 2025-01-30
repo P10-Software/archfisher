@@ -1,4 +1,4 @@
-waii-sdk-py==1.21.0
+waii-sdk-py==1.25.5
 pyyaml
 tqdm
 uuid
@@ -25,3 +25,4 @@ pymilvus==2.4.5
 milvus-model==0.2.5
 transformers
 torch
+mysqlclient==2.2.7
