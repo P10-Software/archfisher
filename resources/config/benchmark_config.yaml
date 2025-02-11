@@ -26,6 +26,10 @@ implementations:
     description: Llama index sample benchmark implementation using their LLM.
     db_connection: 'sqlite:///<provide_entire_path_here>/world_1.sqlite'
 
+  - name: TrialBenchBenchmark
+    class: trialbench.TrialBenchBenchmark
+    description: Test of TrialBenchBenchmark.
+    db_connection: 'sqlite:///<provide_entire_path_here>/world_1.sqlite'
 
   # Vanna Benchmark related details
   - name: VannaBenchmark

@@ -20,9 +20,9 @@ sqlfluff==3.0.7
 vanna==0.7.0
 pinecone
 fastembed
-milvus==2.3.8
+milvus-lite
 pymilvus==2.4.5
 milvus-model==0.2.5
 transformers
 torch
-mysqlclient==2.2.7
+# mysqlclient
