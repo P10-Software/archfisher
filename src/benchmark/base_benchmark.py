@@ -142,7 +142,6 @@ class BenchmarkBase:
         with executor_cls(max_workers=self.threads_count) as executor:
             # Create and submit tasks to executor
             futures = self._submit_tasks_to_executor(executor)
-
             # Use tqdm to track progress
             errors = self._track_progress_and_handle_errors(futures, executor)
 
