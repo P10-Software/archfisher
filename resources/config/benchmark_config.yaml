@@ -24,8 +24,18 @@ implementations:
   - name: LlamaIndexBenchmark
     class: llama_index_benchmark.LlamaIndexBenchmark
     description: Llama index sample benchmark implementation using their LLM.
-    db_connection: 'sqlite:///<provide_entire_path_here>/world_1.sqlite'
+    db_connection: 'sqlite:///../../bin/world_1.sqlite'
 
+  - name: TrialBenchBenchmark
+    class: trialbench.TrialBenchBenchmark
+    description: Test of TrialBenchBenchmark.
+    databases:
+      source:
+        # Golden query runs in source DB
+        type: sqlalchemy
+        connection: 'postgresql://postgres:postgres@localhost:5432/test_db'
+      target:
+        same_as_source: true
 
   # Vanna Benchmark related details
   - name: VannaBenchmark
@@ -44,7 +54,7 @@ implementations:
         connection: 'snowflake://user_name:password@account/db_name/schema_name?role=role_name&warehouse=warehouse_name'
       target:
         # Generated query runs in target DB
-        # When target DB is same as source, we can use the same connection. Otherwise, provide type and connection string
+       # When target DB is same as source, we can use the same connection. Otherwise, provide type and connection string
         same_as_source: true
 
   # Each benchmark can have its relevant configurations defined here.
